@@ -33,13 +33,26 @@ export const GameEngine: React.FC = () => {
 
   const hud = hudSettings || { opacity: 0.7, scale: 1.0, leftHanded: false, joystickPos: { x: 15, y: 75 }, skillBtnPos: { x: 85, y: 75 } };
 
+  // --- ITCH.IO FOCUS FIX ---
+  // Garante que o teclado funcione assim que o jogo carrega no iframe
+  useEffect(() => {
+      const forceFocus = () => {
+          window.focus();
+          if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur();
+          }
+      };
+      
+      forceFocus();
+      window.addEventListener('click', forceFocus);
+      return () => window.removeEventListener('click', forceFocus);
+  }, []);
+
   // Inicialização do Controller e Eventos
   useEffect(() => {
       if (!canvasRef.current) return;
 
       // CRITICAL FIX: Definir o tamanho do canvas ANTES de criar o controller
-      // Isso garante que estrelas, jogador e balas nasçam nas coordenadas corretas
-      // e não amontoados no 0,0 ou 300,150 padrão.
       canvasRef.current.width = window.innerWidth;
       canvasRef.current.height = window.innerHeight;
 
@@ -210,7 +223,6 @@ export const GameEngine: React.FC = () => {
   };
 
   const handleQuit = () => {
-      // CORREÇÃO: Parar o loop do jogo e voltar ao menu diretamente
       if (controllerRef.current) {
           controllerRef.current.stop();
       }
@@ -244,6 +256,7 @@ export const GameEngine: React.FC = () => {
         onTouchEnd={handleTouchEndOrCancel}
         onTouchCancel={handleTouchEndOrCancel}
         onContextMenu={(e) => e.preventDefault()}
+        onClick={() => window.focus()} // Força foco ao clicar
     >
       {isPaused && !isDead && (
         <div className="absolute inset-0 z-[200] bg-black/80 flex items-center justify-center backdrop-blur-sm">

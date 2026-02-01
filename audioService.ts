@@ -61,15 +61,10 @@ const initAudio = () => {
         }
 
         // --- BROWSER AUDIO UNLOCKER ---
-        // Navegadores bloqueiam áudio até a primeira interação do usuário.
-        // Adicionamos listeners globais para desbloquear na primeira oportunidade.
         const unlockAudio = () => {
             if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume().then(() => {
-                    // console.log("Audio Context unlocked");
-                }).catch(e => console.error("Unlock failed", e));
+                audioCtx.resume().catch(e => console.error("Unlock failed", e));
             }
-            // Limpa os listeners após a tentativa
             ['click', 'touchstart', 'keydown'].forEach(evt => 
                 document.removeEventListener(evt, unlockAudio)
             );
@@ -85,49 +80,38 @@ const initAudio = () => {
   }
 };
 
-// Helper robusto para caminhos de áudio
-const getAudioPaths = (filename: string): string[] => {
-    // 1. Caminho absoluto (Padrão ouro para Vite/Web)
-    const paths = [`/sounds/${filename}`];
-
-    // 2. Tentativa de injetar BASE_URL se disponível (sem quebrar se não existir)
-    try {
-        // @ts-ignore
-        if (typeof import.meta !== 'undefined' && import.meta.env) {
-             // @ts-ignore
-             const base = import.meta.env.BASE_URL;
-             if (base && typeof base === 'string') {
-                 const cleanBase = base.endsWith('/') ? base : `${base}/`;
-                 // Adiciona como prioritário se existir uma base customizada
-                 if (cleanBase !== '/') {
-                    paths.unshift(`${cleanBase}sounds/${filename}`);
-                 }
-             }
-        }
-    } catch (e) {
-        // Ignora erros de ambiente/transpilação
-    }
-
-    // 3. Caminho relativo como último recurso
-    paths.push(`sounds/${filename}`);
-
-    return [...new Set(paths)];
-};
-
+// Nova estratégia de carregamento recomendada: Runtime URL Resolution
 const fetchAudioWithRetry = async (filename: string): Promise<ArrayBuffer> => {
-    const paths = getAudioPaths(filename);
+    // Remove barra inicial se houver para concatenar corretamente
+    const cleanName = filename.replace(/^\/+/, '');
+    
+    // Lista de candidatos ordenada por especificidade
+    const candidates = [
+        // 1. Caminho absoluto baseado na localização atual (Solução robusta para subpastas)
+        // Se estiver em site.com/jogo/, vira site.com/jogo/sounds/arquivo.mp3
+        new URL(`sounds/${cleanName}`, window.location.href).href,
+        
+        // 2. Caminho relativo simples (Fallback padrão)
+        `sounds/${cleanName}`,
+        
+        // 3. Caminho absoluto da raiz (Caso esteja na raiz do domínio)
+        `/sounds/${cleanName}`
+    ];
 
-    for (const path of paths) {
+    // Remove duplicatas
+    const uniquePaths = [...new Set(candidates)];
+
+    for (const path of uniquePaths) {
         try {
             const response = await fetch(path);
             const contentType = response.headers.get('content-type');
             
-            // Verifica se o fetch funcionou E se não retornou o index.html (erro 404 comum em SPAs)
+            // Verifica sucesso E se não é HTML (erro 404 comum em SPAs)
             if (response.ok && (!contentType || !contentType.includes('text/html'))) {
                 return await response.arrayBuffer();
             }
         } catch (e) {
-            // Falha silenciosa, tenta o próximo caminho
+            // Continua para o próximo candidato
         }
     }
     throw new Error(`Audio file not found: ${filename}`);
@@ -143,8 +127,7 @@ const loadSound = async (key: string, filename: string) => {
         buffers[key] = audioBuffer;
         packLoaded = true;
     } catch (error) {
-        // Se falhar, não faz nada. O sistema usará os sintetizadores (fallback) automaticamente.
-        // console.warn(`Sound load failed for ${key}, using synth fallback.`);
+        // Falha silenciosa, fallback para sintetizador será usado no playBuffer
     }
 };
 
@@ -203,7 +186,6 @@ const playBuffer = (key: string, vol: number = 1.0, loop: boolean = false): bool
 };
 
 // --- SINTETIZADORES (FALLBACK) ---
-// Usados automaticamente quando os arquivos de áudio falham ou não carregam
 
 const playTone = (freq: number, type: OscillatorType, duration: number, slideTo: number | null = null, vol: number = 0.5) => {
   if (isMuted) return;
@@ -260,7 +242,7 @@ export const music = {
     if (bgmInterval) { clearInterval(bgmInterval); bgmInterval = null; }
     if (playBuffer('bgm_game', 0.8, true)) return;
 
-    // Fallback: Música Sintetizada Procedural
+    // Fallback: Música Sintetizada
     let beat = 0;
     const playStep = () => {
       if (!audioCtx || !musicGain || isMuted) return;

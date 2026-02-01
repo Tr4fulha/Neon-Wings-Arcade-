@@ -31,7 +31,10 @@ const DEFAULT_AUDIO: AudioSettings = {
 export const ensureAuthenticated = async () => {
   if (!supabase) return null;
   try {
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout na conexão')), 5000));
+    // Reduzi o timeout para 1.5s. Na Itch.io, os jogadores querem "Instant Play".
+    // Se a conexão falhar (comum se o domínio itch.io não estiver na whitelist do Supabase),
+    // ele cai para o modo offline (localStorage) rapidamente.
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout na conexão')), 1500));
     const sessionPromise = supabase.auth.getSession();
     const result: any = await Promise.race([sessionPromise, timeout]);
     const { data: { session }, error } = result;
