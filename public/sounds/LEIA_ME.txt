@@ -1,0 +1,28 @@
+
+LOCALIZAÇÃO DA PASTA:
+Esta pasta "sounds" deve estar dentro de uma pasta chamada "public" na raiz do seu projeto.
+
+Estrutura:
+SEU_PROJETO/
+  ├── public/
+  │    └── sounds/  <-- Coloque seus arquivos .mp3 aqui
+  ├── src/
+  ├── index.html
+  └── package.json
+
+ARQUIVOS SUPORTADOS:
+Renomeie seus arquivos de áudio para estes nomes exatos:
+
+- shoot.mp3        (Tiro básico)
+- explosion.mp3    (Explosão de inimigos)
+- hit.mp3          (Dano no jogador)
+- collect.mp3      (Coletar sucata)
+- powerup.mp3      (Pegar powerup)
+- gameover.mp3     (Tela de derrota)
+- ultimate.mp3     (Usar habilidade especial)
+- click.mp3        (Cliques na UI)
+- music_game.mp3   (Música de fundo durante o jogo)
+- music_menu.mp3   (Música do menu principal)
+
+DICA: Se o jogo não encontrar o arquivo, ele usará sons eletrônicos gerados automaticamente (Sintetizador).
+Você pode conferir o status no menu OPÇÕES > ÁUDIO.

@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
+    <title>Neon Wings Arcade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        background-color: #050014;
+        font-family: 'Rajdhani', sans-serif;
+        overflow: hidden;
+        touch-action: none;
+        color: white;
+      }
+      
+      .font-display { font-family: 'Orbitron', sans-serif; }
+      .font-body { font-family: 'Rajdhani', sans-serif; }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar { width: 4px; background: #0f0020; }
+      ::-webkit-scrollbar-thumb { background: #d946ef; border-radius: 4px; }
+
+      .bg-glass {
+        background: rgba(15, 0, 30, 0.85);
+        backdrop-filter: blur(10px);
+      }
+
+      .retro-grid {
+        background-image: 
+          linear-gradient(rgba(255, 0, 255, 0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px);
+        background-size: 50px 50px;
+      }
+
+      .scanlines {
+        background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 50%);
+        background-size: 100% 4px;
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        pointer-events: none;
+        z-index: 50;
+      }
+
+      /* Ajustes de Escala para Mobile Landscape */
+      @media (max-height: 500px) and (orientation: landscape) {
+        .hud-scale {
+          transform: scale(0.65);
+          transform-origin: top left;
+        }
+        .hud-scale-right {
+          transform: scale(0.65);
+          transform-origin: top right;
+        }
+        .hud-scale-bottom {
+          transform: scale(0.7) translateX(-50%);
+          transform-origin: bottom center;
+          left: 50%;
+        }
+      }
+
+      /* Animação de Warp-In para inimigos (CSS Helper se necessário, mas faremos no Canvas) */
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.93.3",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "vite": "https://esm.sh/vite@^7.3.1"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <div class="scanlines"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
